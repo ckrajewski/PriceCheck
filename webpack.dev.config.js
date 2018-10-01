@@ -28,7 +28,11 @@ module.exports = {
       {
         test: /\.jsx?$/,
         exclude: /(node_modules|bower_components)/,
-        loader: 'babel-loader'
+        loader: 'babel-loader',
+        query: {
+          presets: ["babel-preset-env", "react"],
+          plugins: ["transform-object-rest-spread", "transform-class-properties","babel-plugin-react-css-modules"],
+        },
       },
       {
         test: /\.css$/,
