@@ -1,14 +1,13 @@
 import React from "react";
-import { connect } from "react-redux";
-import { bindActionCreators } from 'redux';
-import { fetchStuff } from "../../actions/action";
 import './Address.css';
 import PlacesAutocomplete, {
     getInputProps,
     getSuggestionItemProps,
     suggestions,
+    geocodeByAddress,
+    getLatLng,
 } from 'react-places-autocomplete';
-class Address extends React.Component {
+export default class Address extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -17,6 +16,8 @@ class Address extends React.Component {
             latitude: null,
             longitude: null,
             isGeocoding: false,
+            coordinates:{},
+            cachedCoordinates:null,
         };
     }
 
@@ -28,24 +29,7 @@ class Address extends React.Component {
             errorMessage: '',
         });
     };
-
-    handleSelect = selected => {
-        this.setState({ isGeocoding: true, address: selected });
-        geocodeByAddress(selected)
-            .then(res => getLatLng(res[0]))
-            .then(({ lat, lng }) => {
-                this.setState({
-                    latitude: lat,
-                    longitude: lng,
-                    isGeocoding: false,
-                });
-            })
-            .catch(error => {
-                this.setState({ isGeocoding: false });
-                console.log('error', error); // eslint-disable-line no-console
-            });
-    };
-
+   
     handleCloseClick = () => {
         this.setState({
             address: '',
@@ -53,14 +37,43 @@ class Address extends React.Component {
             longitude: null,
         });
     };
-
+    handleSelect = selected => {
+       // this.setState({ isGeocoding: true, address: selected });
+        geocodeByAddress(selected)
+            .then(res => getLatLng(res[0]))
+            .then(({ lat, lng }) => {
+                const coordinates={lng:lng,lat:lat};
+                this.setState({
+                    latitude: lat,
+                    longitude: lng,
+                    isGeocoding: false,
+                    userAddress: selected,
+                    coordinates:coordinates,
+                    address: selected,
+                });
+            })
+            .catch(error => {
+                this.setState({ isGeocoding: false });
+                console.log('error', error); // eslint-disable-line no-console
+            });
+    };
     handleError = (status, clearSuggestions) => {
         console.log('Error from Google Maps API', status); // eslint-disable-line no-console
         this.setState({ errorMessage: status }, () => {
             clearSuggestions();
         });
     };
-
+    isEmpty = obj => {
+        return Object.keys(obj).length === 0;
+    }
+    twoCoordinates = () => {
+      const {coordinates, cachedCoordinates } = this.state;
+      if(cachedCoordinates == null) {
+        return false;
+      }
+      return coordinates.lat === cachedCoordinates.lat &&
+      coordinates.lng === cachedCoordinates.lng;
+    }
     render() {
         const {
             address,
@@ -68,8 +81,18 @@ class Address extends React.Component {
             latitude,
             longitude,
             isGeocoding,
+            coordinates,
+            userAddress
         } = this.state;
-
+        let currentUserAddress = userAddress;
+        const propsUserAddress=this.props.userAddress;
+        if(propsUserAddress) {
+          currentUserAddress=propsUserAddress;
+        }
+        if(!this.isEmpty(coordinates) && !this.twoCoordinates()) {
+          this.props.handleCoordinates(coordinates);
+          this.setState({cachedCoordinates: coordinates });
+        }
         return (
             <div className="searchComponent">
         <PlacesAutocomplete
@@ -88,7 +111,7 @@ class Address extends React.Component {
                       placeholder: 'Search Places...',
                       className: 'Demo__search-input',
                     })}
-                   value={this.props.userAddress}/>
+                   value={currentUserAddress}/>
                   {this.state.address.length > 0 && (
                     <button
                       className="Demo__clear-button"
@@ -101,7 +124,6 @@ class Address extends React.Component {
                 {suggestions.length > 0 && (
                   <div className="Demo__autocomplete-container">
                     {suggestions.map(suggestion => {
-                      debugger;
                       return (
                         /* eslint-disable react/jsx-key */
                         <div
@@ -131,41 +153,9 @@ class Address extends React.Component {
         {errorMessage.length > 0 && (
           <div className="Demo__error-message">{this.state.errorMessage}</div>
         )}
-
-        {((latitude && longitude) || isGeocoding) && (
-          <div>
-            <h3 className="Demo__geocode-result-header">Geocode result</h3>
-            {isGeocoding ? (
-              <div>
-                <i className="fa fa-spinner fa-pulse fa-3x fa-fw Demo__spinner" />
-              </div>
-            ) : (
-              <div>
-                <div className="Demo__geocode-result-item--lat">
-                  <label>Latitude:</label>
-                  <span>{latitude}</span>
-                </div>
-                <div className="Demo__geocode-result-item--lng">
-                  <label>Longitude:</label>
-                  <span>{longitude}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
         );
     }
 }
-const mapToStateProps = (state) => {
-    return {
-        data: state.weather
-    };
-};
-
-const mapDispatchToProps = dispatch => ({
-    fetchStuff: () => dispatch(fetchStuff())
-});
 
 
-export default connect(mapToStateProps, mapDispatchToProps)(Address);

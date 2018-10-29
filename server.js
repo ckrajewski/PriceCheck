@@ -7,6 +7,10 @@ const fetch = require('node-fetch');
 const axios = require('axios');
 const NodeGeocoder = require('node-geocoder'); 
 const serverToken = '3EnWxnUelyFMUaIzvw2QILYXff4N0lc5-a9LclBE';
+const bodyParser = require("body-parser");
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
 app.set('port', (process.env.PORT || 3000));
 
 app.use(express.static(path.join(__dirname, '/dist')));
@@ -23,7 +27,7 @@ app.get('/downloadResume/Word', function(request, response) {
   response.download(file);
 });
 
-app.get('/test', (req, res) => {
+app.post('/fetchUberData', (req, res) => {
   console.log(serverToken);
   const options = {
   	headers : {
@@ -32,7 +36,10 @@ app.get('/test', (req, res) => {
   		'Content-Type': 'application/json'
   	}
   };
-  axios.get('https://api.uber.com/v1.2/estimates/price?start_latitude=37.7752315&start_longitude=-122.418075&end_latitude=37.7752415&end_longitude=-122.518075',options)
+  debugger;
+  const userLocation = req.body.userCoordinates;
+  const toLocation =  req.body.toCoordinates;
+  axios.get(`https://api.uber.com/v1.2/estimates/price?start_latitude=${userLocation.lat}&start_longitude=${userLocation.lng}&end_latitude=${toLocation.lat}&end_longitude=${toLocation.lng}`,options)
   .then(response => {
   	console.log(response.data);
   	res.send(response.data);

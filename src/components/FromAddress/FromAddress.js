@@ -11,33 +11,30 @@ export default class FromAddress extends React.Component {
         this.state = {
             usingCurrentLocationPermission: 'pending',
             usingCurrentLocation: false,
-            userLocation: {},
+            coordinates: {},
             userAddress:null,
+            cachedCoordinates:null,
         };
     }
     componentDidMount() {
-       // this.getCurrentPosition;
-        /*
-        navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
-            debugger;
-            console.log(result.state);
-        });
-        */
-        //console.log(this);
+        navigator.permissions.query({name:'geolocation'}).then((result) => {
+        if(result.state === 'granted') {
         navigator.geolocation.getCurrentPosition((userLocation) => {
             //console.log(this);
             //this.setState({userLocation});
             this.getAddress({lat: userLocation.coords.latitude,lng: userLocation.coords.longitude});
         });
-
+     }
+    });
     }
-    getAddress(latlng){
+    getAddress = (latlng) => {
         const geocoder = new google.maps.Geocoder;
         geocoder.geocode({'location': latlng}, (results, status) => {
-            this.setState({userLocation: latlng, userAddress:results[0].formatted_address.split(',')[0]});
+            this.setState({coordinates: latlng, userAddress:results[0].formatted_address.split(',')[0]});
         });
 
-    }
+    };
+
     usingCurrentLocation() {
         return (
             <div> Use CurrentLocation
@@ -45,9 +42,23 @@ export default class FromAddress extends React.Component {
             </div>
         );
     }
+    isEmpty = obj => {
+        return Object.keys(obj).length === 0;
+    }
+    twoCoordinates = () => {
+      const {coordinates, cachedCoordinates } = this.state;
+      if(cachedCoordinates==null){
+        return false;
+      }
+      return coordinates.lat === cachedCoordinates.lat &&
+      coordinates.lng === cachedCoordinates.lng;
+    }
     render() {
-        const { usingCurrentLocationPermission,userLocation, userAddress } = this.state;
-        debugger;
+        const { usingCurrentLocationPermission, cachedUserLocation, coordinates, userAddress } = this.state;
+        if(!this.isEmpty(coordinates) && !this.twoCoordinates()) {
+          this.props.handleCoordinates(coordinates);
+          this.setState({cachedCoordinates: coordinates });
+        }
         const renderUseLocationCheckbox = usingCurrentLocationPermission === 'granted' ? this.usingCurrentLocation() : null;
         return (
             <div className="FromAddress">
