@@ -5,8 +5,11 @@ var http = require('http');
 var fs = require('fs');
 const fetch = require('node-fetch');
 const axios = require('axios');
-const NodeGeocoder = require('node-geocoder'); 
-const serverToken = '3EnWxnUelyFMUaIzvw2QILYXff4N0lc5-a9LclBE';
+const NodeGeocoder = require('node-geocoder');
+const serverCredentials = require('./serverCredentials');
+const serverToken = serverCredentials.uberToken;
+const lyftAuth = serverCredentials.lyftAuth;
+let lyftToken = null;
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -14,64 +17,99 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.set('port', (process.env.PORT || 3000));
 
 app.use(express.static(path.join(__dirname, '/dist')));
-app.use("/public/images", express.static(__dirname + "/src/public/images"));
-app.use("/public/documents", express.static(__dirname + "/src/public/documents"));
 
-app.get('/downloadResume/PDF', function(request, response) { 
-  var file = path.join(__dirname, '/src/public/documents/ChristopherKrajewskiResume.pdf');
-  response.download(file);
-});
+const getLfytToken = () => {
+    debugger;
+    const headers = {
+        'Authorization': `Basic ${lyftAuth}`,
+        'Content-Type': 'application/json'
+    };
+    const data = {
+        'grant_type': 'client_credentials',
+        'scope': 'public'
 
-app.get('/downloadResume/Word', function(request, response) { 
-  var file = path.join(__dirname, '/src/public/documents/ChristopherKrajewskiResume.docx');
-  response.download(file);
-});
+    };
+
+    axios.post('https://api.lyft.com/oauth/token', data, { headers: headers })
+        .then(response => {
+            console.log(response.data);
+            lyftToken = response.data.access_token;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+};
+exports.getLfytToken = getLfytToken;
+
+if (!lyftToken) {
+    this.getLfytToken();
+}
 
 app.post('/fetchUberData', (req, res) => {
-  console.log(serverToken);
-  const options = {
-  	headers : {
-  		'Authorization': `Token ${serverToken}`,
-  		'Accept-Language': 'en_US',
-  		'Content-Type': 'application/json'
-  	}
-  };
-  debugger;
-  const userLocation = req.body.userCoordinates;
-  const toLocation =  req.body.toCoordinates;
-  axios.get(`https://api.uber.com/v1.2/estimates/price?start_latitude=${userLocation.lat}&start_longitude=${userLocation.lng}&end_latitude=${toLocation.lat}&end_longitude=${toLocation.lng}`,options)
-  .then(response => {
-  	console.log(response.data);
-  	res.send(response.data);
-  })
-  .catch(error => {
-    console.log(error);
-  });
+    console.log(serverToken);
+    const options = {
+        headers: {
+            'Authorization': `Token ${serverToken}`,
+            'Accept-Language': 'en_US',
+            'Content-Type': 'application/json'
+        }
+    };
+    const userLocation = req.body.userCoordinates;
+    const toLocation = req.body.toCoordinates;
+    axios.get(`https://api.uber.com/v1.2/estimates/price?start_latitude=${userLocation.lat}&start_longitude=${userLocation.lng}&end_latitude=${toLocation.lat}&end_longitude=${toLocation.lng}`, options)
+        .then(response => {
+            console.log(response.data);
+            res.send(response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+});
+
+
+app.post('/fetchLyftData', (req, res) => {
+    debugger;
+    const options = {
+        headers: {
+            'Authorization': `Bearer ${lyftToken}`,
+            'Content-Type': 'application/json'
+        }
+    };
+    const userLocation = req.body.userCoordinates;
+    const toLocation = req.body.toCoordinates;
+    axios.get(`https://api.lyft.com/v1/cost?start_lat=${userLocation.lat}&start_lng=${userLocation.lng}&end_lat=${toLocation.lat}&end_lng=${toLocation.lng}`, options)
+        .then(response => {
+            debugger;
+            res.send(response.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
 });
 
 app.get('/geoCode', (req, res) => {
-	const options ={
-		provider: 'google'
-	};
-	const geocoder = NodeGeocoder(options);
-	nodeGeocoder.fromAddress("Eiffel Tower",fetch).then(
-		response => {
-    const { lat, lng } = response.results[0].geometry.location;
-    const coordinates = {lat:lat,lon:lng};
-    console.log(coordinates);
-    res.send(coordinates);
-  },
-  error => {
-    console.error(error);
-  }
-);
+    const options = {
+        provider: 'google'
+    };
+    const geocoder = NodeGeocoder(options);
+    nodeGeocoder.fromAddress("Eiffel Tower", fetch).then(
+        response => {
+            const { lat, lng } = response.results[0].geometry.location;
+            const coordinates = { lat: lat, lon: lng };
+            console.log(coordinates);
+            res.send(coordinates);
+        },
+        error => {
+            console.error(error);
+        }
+    );
 });
 
 app.get('/', function(request, response) {
-  console.log("starting here");
-  response.sendFile(path.join(__dirname, '/dist/index.html'));
+    console.log("starting here");
+    response.sendFile(path.join(__dirname, '/dist/index.html'));
 });
 
 app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+    console.log('Node app is running on port', app.get('port'));
 });

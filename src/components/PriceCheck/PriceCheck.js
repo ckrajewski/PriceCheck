@@ -1,9 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from 'redux';
-import { fetchUberData } from "../../actions/action";
+import { fetchUberData, fetchLyftData } from "../../actions/action";
 import Address from "../Address/Address";
 import FromAddress from "../FromAddress/FromAddress";
+import PriceDisplay from "../PriceDisplay/PriceDisplay";
 import "./PriceCheck.css";
 
 class PriceCheck extends React.Component {
@@ -40,9 +41,9 @@ class PriceCheck extends React.Component {
     }
     render() {
         const {userCoordinates, toCoordinates, cachedUserLocation, cachedToLocation} = this.state;
-        const {uberData} = this.props;
+        const {uberData, lyftData} = this.props;
         let uberPrices=[];
-        debugger;
+        let lyftPrices=[];
         if(!this.isEmpty(uberData)){
             uberPrices = uberData.prices.reduce((result,route) => {
                 if(route.display_name==="UberX" || route.display_name==="UberPool"){
@@ -50,34 +51,52 @@ class PriceCheck extends React.Component {
                 }
                 return result;
             },[]);
+            debugger;
+        }
+        if(!this.isEmpty(lyftData)){
+            debugger;
+            lyftPrices = lyftPrices.cost_estimates.reduce((result,route) => {
+                if(route.display_name==="Shared" || route.display_name==="Lyft"){
+                    result.push(route);
+                }
+                return result;
+            },[]);
+            debugger;
         }
         if(!this.isEmpty(userCoordinates) && !this.isEmpty(toCoordinates) && !this.isCachedEqual()) {
             this.props.fetchUberData(userCoordinates, toCoordinates);
+            this.props.fetchLyftData(userCoordinates, toCoordinates);
             this.setState({cachedToLocation: toCoordinates, cachedUserLocation: userCoordinates});
         }
         return (
             <div className="PriceCheckContainer">
-            {uberPrices.map( uberPrice => 
-                uberPrice.estimate 
-            )}
                 <div className="FromAddress">
                     <div className="Header"> From Address </div>
                     <FromAddress handleCoordinates={this.handleUserCoordinates} />
                 </div>
                 <div className="ToAddress">
+                    <div className="Header"> To Address </div>
                     <Address handleCoordinates={this.handleToCoordinates}  />
                 </div>
+                {uberPrices.map( uberPrice => 
+                    <PriceDisplay rideService={uberPrice.display_name} price={uberPrice.estimate} />
+                 )}
+                 {lyftPrices.map( lyftPrice => 
+                    <PriceDisplay rideService={lyftPrice.display_name} price={(lyftPrice.estimated_cost_cents_min/100) + '-' + (lyftPrice.estimated_cost_cents_max/100) } />
+                 )}
             </div>
         );
     }
 }
  const mapToStateProps = (state) => {
     return {
-      uberData: state.uber.uberData
+      uberData: state.uber.uberData,
+      lyftData: state.lyft.lyftData
     };
   };
 
 const mapDispatchToProps = dispatch => ({
-  fetchUberData: (userCoordinates, toCoordinates) => dispatch(fetchUberData(userCoordinates, toCoordinates))
+  fetchUberData: (userCoordinates, toCoordinates) => dispatch(fetchUberData(userCoordinates, toCoordinates)),
+  fetchLyftData: (userCoordinates, toCoordinates) => dispatch(fetchLyftData(userCoordinates, toCoordinates))
 });
 export default connect(mapToStateProps,mapDispatchToProps)(PriceCheck);

@@ -1,6 +1,8 @@
 import { combineReducers } from "redux"
-import reducer from "./someReducer";
+import uberReducer from "./uberReducer";
+import lyftReducer from "./lyftReducer";
 
 export default combineReducers({
-	uber: reducer
+	uber: uberReducer,
+	lyft:lyftReducer
 })

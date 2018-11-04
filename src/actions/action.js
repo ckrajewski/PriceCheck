@@ -1,7 +1,6 @@
 import axios from "axios";
 
 export function fetchUberData(userCoordinates, toCoordinates){
-	debugger;
 	return function(dispatch) {
 		axios.post("/api/fetchUberData", {
 			userCoordinates:userCoordinates,
@@ -14,6 +13,22 @@ export function fetchUberData(userCoordinates, toCoordinates){
 		 .catch((err) =>{
 		 	debugger;
 		 	dispatch({type: "RECEIVED_STUFF_ERROR",payload:err})
+		 })
+	}	
+}
+export function fetchLyftData(userCoordinates, toCoordinates){
+	return function(dispatch) {
+		axios.post("/api/fetchLyftData", {
+			userCoordinates:userCoordinates,
+			toCoordinates:toCoordinates
+		})
+		.then((response) => {
+			debugger;
+		  dispatch({type: "RECEIVED_LYFT_DATA",payload:response.data})
+		 })
+		 .catch((err) =>{
+		 	debugger;
+		 	dispatch({type: "RECEIVED_LYFT_ERROR",payload:err})
 		 })
 	}	
 }
