@@ -51,17 +51,14 @@ class PriceCheck extends React.Component {
                 }
                 return result;
             },[]);
-            debugger;
         }
         if(!this.isEmpty(lyftData)){
-            debugger;
-            lyftPrices = lyftPrices.cost_estimates.reduce((result,route) => {
+            lyftPrices = lyftData.cost_estimates.reduce((result,route) => {
                 if(route.display_name==="Shared" || route.display_name==="Lyft"){
                     result.push(route);
                 }
                 return result;
             },[]);
-            debugger;
         }
         if(!this.isEmpty(userCoordinates) && !this.isEmpty(toCoordinates) && !this.isCachedEqual()) {
             this.props.fetchUberData(userCoordinates, toCoordinates);

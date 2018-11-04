@@ -7,11 +7,9 @@ export function fetchUberData(userCoordinates, toCoordinates){
 			toCoordinates:toCoordinates
 		})
 		.then((response) => {
-			debugger;
 		  dispatch({type: "RECEIVED_UBER_DATA",payload:response.data})
 		 })
 		 .catch((err) =>{
-		 	debugger;
 		 	dispatch({type: "RECEIVED_STUFF_ERROR",payload:err})
 		 })
 	}	
@@ -23,11 +21,9 @@ export function fetchLyftData(userCoordinates, toCoordinates){
 			toCoordinates:toCoordinates
 		})
 		.then((response) => {
-			debugger;
 		  dispatch({type: "RECEIVED_LYFT_DATA",payload:response.data})
 		 })
 		 .catch((err) =>{
-		 	debugger;
 		 	dispatch({type: "RECEIVED_LYFT_ERROR",payload:err})
 		 })
 	}	

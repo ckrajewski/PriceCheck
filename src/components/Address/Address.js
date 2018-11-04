@@ -20,7 +20,7 @@ export default class Address extends React.Component {
             cachedCoordinates:null,
         };
     }
-
+    
     handleChange = address => {
         this.setState({
             address,
@@ -84,7 +84,7 @@ export default class Address extends React.Component {
             coordinates,
             userAddress
         } = this.state;
-        let currentUserAddress = userAddress;
+        let currentUserAddress = address;
         const propsUserAddress=this.props.userAddress;
         if(propsUserAddress) {
           currentUserAddress=propsUserAddress;

@@ -19,7 +19,6 @@ app.set('port', (process.env.PORT || 3000));
 app.use(express.static(path.join(__dirname, '/dist')));
 
 const getLfytToken = () => {
-    debugger;
     const headers = {
         'Authorization': `Basic ${lyftAuth}`,
         'Content-Type': 'application/json'
@@ -80,6 +79,7 @@ app.post('/fetchLyftData', (req, res) => {
     axios.get(`https://api.lyft.com/v1/cost?start_lat=${userLocation.lat}&start_lng=${userLocation.lng}&end_lat=${toLocation.lat}&end_lng=${toLocation.lng}`, options)
         .then(response => {
             debugger;
+            console.log(response.data);
             res.send(response.data);
         })
         .catch(error => {

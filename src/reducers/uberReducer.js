@@ -6,7 +6,7 @@ export default function reducer(state={
 		case "RECEIVED_UBER_DATA":{
 			return {...state,fetched:true,uberData:action.payload};	
 		}
-		case "RECEIVED_WEATHER_STUFF_ERROR":{
+		case "RECEIVED_UBER_ERROR":{
 		}	
 	}
 	return state;
