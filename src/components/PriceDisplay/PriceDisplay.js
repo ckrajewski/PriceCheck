@@ -8,13 +8,14 @@ export default class PriceDisplay extends React.Component {
     }
     render() {
         
-        const {rideService, price} = this.props;
+        const {rideService, price, rideOption,color} = this.props;
         if(!rideService) {
             return;
         }
+        const currentColor={color:color};
         return (
-            <div className="FromAddress">
-                <div className="rideService"> {rideService}
+            <div className="PriceContainer">
+                <div className="rideOption" style={currentColor}> {rideOption}
                 </div>
                 <div className="price"> {price}
                 </div>

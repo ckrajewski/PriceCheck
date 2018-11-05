@@ -10,3 +10,11 @@
 	width:500px;
 	margin:auto;
 }
+
+.center {
+	text-align:center;
+}
+.rideService {
+	font-size: 1.35em;
+	font-weight: bold;
+}

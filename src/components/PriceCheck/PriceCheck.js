@@ -42,8 +42,11 @@ class PriceCheck extends React.Component {
     render() {
         const {userCoordinates, toCoordinates, cachedUserLocation, cachedToLocation} = this.state;
         const {uberData, lyftData} = this.props;
+        const lyftColor = {color:"#ff00bf"};
         let uberPrices=[];
-        let lyftPrices=[];
+        let lyftPrices=[];        
+        let uberTitle=null;
+        let lyftTitle=null;
         if(!this.isEmpty(uberData)){
             uberPrices = uberData.prices.reduce((result,route) => {
                 if(route.display_name==="UberX" || route.display_name==="UberPool"){
@@ -51,6 +54,7 @@ class PriceCheck extends React.Component {
                 }
                 return result;
             },[]);
+            uberTitle="Uber";
         }
         if(!this.isEmpty(lyftData)){
             lyftPrices = lyftData.cost_estimates.reduce((result,route) => {
@@ -59,6 +63,7 @@ class PriceCheck extends React.Component {
                 }
                 return result;
             },[]);
+            lyftTitle="Lyft";
         }
         if(!this.isEmpty(userCoordinates) && !this.isEmpty(toCoordinates) && !this.isCachedEqual()) {
             this.props.fetchUberData(userCoordinates, toCoordinates);
@@ -67,20 +72,32 @@ class PriceCheck extends React.Component {
         }
         return (
             <div className="PriceCheckContainer">
+            
                 <div className="FromAddress">
                     <div className="Header"> From Address </div>
                     <FromAddress handleCoordinates={this.handleUserCoordinates} />
                 </div>
+                
                 <div className="ToAddress">
                     <div className="Header"> To Address </div>
                     <Address handleCoordinates={this.handleToCoordinates}  />
                 </div>
+                <div className="center">
+                <div className="rideService">
+                    {uberTitle}
+                </div>
                 {uberPrices.map( uberPrice => 
-                    <PriceDisplay rideService={uberPrice.display_name} price={uberPrice.estimate} />
+                    <PriceDisplay color="black" rideService="Uber" rideOption={uberPrice.display_name} price={uberPrice.estimate} />
                  )}
+                </div>
+                <div className="center">
+                <div className="rideService" style={lyftColor}>
+                    {lyftTitle}
+                </div>
                  {lyftPrices.map( lyftPrice => 
-                    <PriceDisplay rideService={lyftPrice.display_name} price={(lyftPrice.estimated_cost_cents_min/100) + '-' + (lyftPrice.estimated_cost_cents_max/100) } />
+                    <PriceDisplay color="#ff00bf" rideService="Lyft" rideOption={lyftPrice.display_name} price={"$"+(lyftPrice.estimated_cost_cents_min/100) + '-' + (lyftPrice.estimated_cost_cents_max/100) } />
                  )}
+                 </div>
             </div>
         );
     }

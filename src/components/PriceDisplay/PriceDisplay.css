@@ -1,0 +1,14 @@
+.rideOption {
+	font-weight: bold;
+}
+.PriceContainer {
+	display: flex;
+	margin:auto;
+	width: 20%;
+	justify-content: space-between;
+}
+
+.price {
+	color: #3CBC8D;
+	font-weight: bold;
+}
