@@ -1,4 +1,7 @@
 import React from "react";
+import { fetchLocationData } from "../../actions/action";
+import { connect } from "react-redux";
+import { bindActionCreators } from 'redux';
 import './Address.css';
 import PlacesAutocomplete, {
     getInputProps,
@@ -7,7 +10,7 @@ import PlacesAutocomplete, {
     geocodeByAddress,
     getLatLng,
 } from 'react-places-autocomplete';
-export default class Address extends React.Component {
+export class Address extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -84,13 +87,15 @@ export default class Address extends React.Component {
             coordinates,
             userAddress
         } = this.state;
+        const {addressType} = this.props;
         let currentUserAddress = address;
         const propsUserAddress=this.props.userAddress;
         if(propsUserAddress) {
           currentUserAddress=propsUserAddress;
         }
         if(!this.isEmpty(coordinates) && !this.twoCoordinates()) {
-          this.props.handleCoordinates(coordinates);
+          //this.props.handleCoordinates(coordinates);
+          this.props.sendLocationData(addressType,coordinates);
           this.setState({cachedCoordinates: coordinates });
         }
         return (
@@ -157,5 +162,8 @@ export default class Address extends React.Component {
         );
     }
 }
-
+const mapDispatchToProps = (dispatch) => ({
+    sendLocationData: (addressType, coordinates) => dispatch(fetchLocationData(addressType, coordinates))
+});
+export default connect(null, mapDispatchToProps)(Address);
 

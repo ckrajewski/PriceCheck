@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from 'redux';
-import { fetchStuff } from "../../actions/action";
+import { fetchLocationData } from "../../actions/action";
 import Address from "../Address/Address";
 
-export default class FromAddress extends React.Component {
+class FromAddress extends React.Component {
 
     constructor(props) {
         super(props);
@@ -56,15 +56,20 @@ export default class FromAddress extends React.Component {
     render() {
         const { usingCurrentLocationPermission, cachedUserLocation, coordinates, userAddress } = this.state;
         if(!this.isEmpty(coordinates) && !this.twoCoordinates()) {
-          this.props.handleCoordinates(coordinates);
+          //this.props.handleCoordinates(coordinates);
+          this.props.sendFromUserData("fromAddress", coordinates);
           this.setState({cachedCoordinates: coordinates });
         }
         const renderUseLocationCheckbox = usingCurrentLocationPermission === 'granted' ? this.usingCurrentLocation() : null;
         return (
             <div className="FromAddress">
             {renderUseLocationCheckbox}
-            <Address userAddress={userAddress}/>
+            <Address userAddress={userAddress} addressType="FromAddress"/>
             </div>
         );
     }
 }
+const mapDispatchToProps = (dispatch) => ({
+    sendFromUserData: (addressType, coordinates) => dispatch(fetchLocationData(addressType, coordinates))
+});
+export default connect(null, mapDispatchToProps)(FromAddress);

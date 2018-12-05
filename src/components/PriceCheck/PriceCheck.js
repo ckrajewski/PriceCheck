@@ -19,18 +19,14 @@ class PriceCheck extends React.Component {
             cachedToLocation:null,
         };
     }
-    handleToCoordinates = toCoordinates => {
-        this.setState({toCoordinates});
-    };
-    handleUserCoordinates = userCoordinates => {
-        this.setState({userCoordinates});
-    };
+    
     isEmpty = obj => {
         return Object.keys(obj).length === 0;
     }
     isCachedEqual= () => {
 
-      const {userCoordinates, toCoordinates, cachedUserLocation, cachedToLocation } = this.state;
+      const {cachedUserLocation, cachedToLocation } = this.state;
+      const {userCoordinates, toCoordinates} = this.props; 
       if(cachedUserLocation==null || cachedToLocation == null){
         return false;
       }
@@ -40,8 +36,8 @@ class PriceCheck extends React.Component {
       cachedToLocation.lng === cachedToLocation.lng;
     }
     render() {
-        const {userCoordinates, toCoordinates, cachedUserLocation, cachedToLocation} = this.state;
-        const {uberData, lyftData} = this.props;
+        const {cachedUserLocation, cachedToLocation} = this.state;
+        const {uberData, lyftData, userCoordinates, toCoordinates} = this.props;
         const lyftColor = {color:"#ff00bf"};
         let uberPrices=[];
         let lyftPrices=[];        
@@ -75,12 +71,12 @@ class PriceCheck extends React.Component {
             
                 <div className="FromAddress">
                     <div className="Header"> From Address </div>
-                    <FromAddress handleCoordinates={this.handleUserCoordinates} />
+                    <FromAddress />
                 </div>
                 
                 <div className="ToAddress">
                     <div className="Header"> To Address </div>
-                    <Address handleCoordinates={this.handleToCoordinates}  />
+                    <Address addressType="toAddress"  />
                 </div>
                 <div className="center">
                 <div className="rideService">
@@ -105,7 +101,9 @@ class PriceCheck extends React.Component {
  const mapToStateProps = (state) => {
     return {
       uberData: state.uber.uberData,
-      lyftData: state.lyft.lyftData
+      lyftData: state.lyft.lyftData,
+      userCoordinates: state.user.userFromLocation,
+      toCoordinates: state.user.userToLocation,
     };
   };
 
